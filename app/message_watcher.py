@@ -43,6 +43,12 @@ async def on_message(message):
         print("対象のメンションがされていないため、転送しません")
         return
 
+    base_channel = message.channel
+    if isinstance(message.channel, discord.Thread):
+        base_channel = message.channel.parent
+        
+    everyone_role = message.guild.default_role
+    
     # プライベートフィルター
     try:
         overwrites = base_channel.overwrites_for(everyone_role)
@@ -58,12 +64,6 @@ async def on_message(message):
     
     if target_channel is None or message.channel.id == TARGET_CHANNEL_ID:
         return
-
-    base_channel = message.channel
-    if isinstance(message.channel, discord.Thread):
-        base_channel = message.channel.parent
-
-    everyone_role = message.guild.default_role
 
     category_name = base_channel.category.name if base_channel.category else "カテゴリなし"
     channel_name = base_channel.name
