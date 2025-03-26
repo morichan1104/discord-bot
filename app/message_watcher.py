@@ -6,8 +6,9 @@ from server import server_thread  # ← FastAPIを並列起動
 # 環境変数の取得
 TOKEN = os.environ.get("TOKEN")
 TARGET_CHANNEL_ID = os.environ.get("TARGET_CHANNEL_ID")
+TARGET_ROLE_IDS = [int(x) for x in os.getenv("TARGET_ROLE_IDS", "").split(",") if x.strip().isdigit()]
 
-if TOKEN is None or TARGET_CHANNEL_ID is None:
+if TOKEN is None or TARGET_CHANNEL_ID is None or TARGET_ROLE_IDS is None:
     print("環境変数が設定されていません。")
     exit(1)
 
@@ -29,6 +30,15 @@ async def on_ready():
 @bot.event
 async def on_message(message):
     if message.author.bot:
+        return
+
+    # メンションフィルター
+    mention_hit = False
+    if any(role.id in TARGET_ROLE_IDS for role in message.role_mentions):
+        mention_hit = True
+        
+    if not mention_hit:
+        print("対象のメンションがされていないため、転送しません")
         return
 
     target_channel = message.guild.get_channel(TARGET_CHANNEL_ID)
