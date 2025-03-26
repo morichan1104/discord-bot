@@ -1,7 +1,9 @@
 import os
 import discord
 from discord.ext import commands
+from server import server_thread  # ← FastAPIを並列起動
 
+# 環境変数の取得
 TOKEN = os.environ.get("TOKEN")
 TARGET_CHANNEL_ID = os.environ.get("TARGET_CHANNEL_ID")
 
@@ -11,6 +13,7 @@ if TOKEN is None or TARGET_CHANNEL_ID is None:
 
 TARGET_CHANNEL_ID = int(TARGET_CHANNEL_ID)
 
+# Intent設定
 intents = discord.Intents.default()
 intents.message_content = True
 intents.guilds = True
@@ -65,4 +68,8 @@ async def on_message(message):
 
     await bot.process_commands(message)
 
+# Webサーバー起動（Koyebの無料プラン維持のため）
+server_thread()
+
+# Bot起動
 bot.run(TOKEN)
