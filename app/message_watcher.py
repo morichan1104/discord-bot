@@ -1,11 +1,15 @@
 import os
 import discord
 from discord.ext import commands
-from server import server_thread
-
 
 TOKEN = os.environ.get("TOKEN")
-TARGET_CHANNEL_ID = int(os.environ.get("TARGET_CHANNEL_ID"))
+TARGET_CHANNEL_ID = os.environ.get("TARGET_CHANNEL_ID")
+
+if TOKEN is None or TARGET_CHANNEL_ID is None:
+    print("環境変数が設定されていません。")
+    exit(1)
+
+TARGET_CHANNEL_ID = int(TARGET_CHANNEL_ID)
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -28,12 +32,10 @@ async def on_message(message):
     if target_channel is None or message.channel.id == TARGET_CHANNEL_ID:
         return
 
-    # スレッドなら親チャンネルを使う
     base_channel = message.channel
     if isinstance(message.channel, discord.Thread):
         base_channel = message.channel.parent
 
-    # プライベートチャンネルなら無視
     everyone_role = message.guild.default_role
     try:
         overwrites = base_channel.overwrites_for(everyone_role)
@@ -41,7 +43,7 @@ async def on_message(message):
             print("プライベートチャンネルなので無視")
             return
     except AttributeError:
-        print("チャンネル権限取得に失敗（対応していないチャンネルタイプ）")
+        print("チャンネル権限取得に失敗")
         return
 
     category_name = base_channel.category.name if base_channel.category else "カテゴリなし"
@@ -62,8 +64,5 @@ async def on_message(message):
         print(f"転送失敗: {e}")
 
     await bot.process_commands(message)
-
-# Koyeb用 サーバー立ち上げ
-server_thread()
 
 bot.run(TOKEN)
