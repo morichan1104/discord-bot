@@ -5,7 +5,7 @@ from server import server_thread
 
 
 TOKEN = os.environ.get("TOKEN")
-TARGET_CHANNEL_ID = os.environ.get("TARGET_CHANNEL_ID")
+TARGET_CHANNEL_ID = int(os.environ.get("TARGET_CHANNEL_ID"))
 
 intents = discord.Intents.default()
 intents.message_content = True
