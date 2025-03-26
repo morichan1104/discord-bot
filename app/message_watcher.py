@@ -6,13 +6,14 @@ from server import server_thread  # ← FastAPIを並列起動
 # 環境変数の取得
 TOKEN = os.environ.get("TOKEN")
 TARGET_CHANNEL_ID = os.environ.get("TARGET_CHANNEL_ID")
-TARGET_ROLE_IDS = [int(x) for x in os.getenv("TARGET_ROLE_IDS", "").split(",") if x.strip().isdigit()]
+TARGET_ROLE_ID = os.environ.get("TARGET_ROLE_ID")
 
-if TOKEN is None or TARGET_CHANNEL_ID is None or TARGET_ROLE_IDS is None:
+if TOKEN is None or TARGET_CHANNEL_ID is None or TARGET_ROLE_ID is None:
     print("環境変数が設定されていません。")
     exit(1)
 
 TARGET_CHANNEL_ID = int(TARGET_CHANNEL_ID)
+TARGET_ROLE_ID = int(TARGET_ROLE_ID)
 
 # Intent設定
 intents = discord.Intents.default()
@@ -34,9 +35,8 @@ async def on_message(message):
 
     # メンションフィルター
     mention_hit = False
-    if any(role.id in TARGET_ROLE_IDS for role in message.role_mentions):
-        mention_hit = True
-        
+    if any(role.id == TARGET_ROLE_ID for role in message.role_mentions):
+        mention_hit = True        
     if not mention_hit:
         print("対象のメンションがされていないため、転送しません")
         return
@@ -62,7 +62,15 @@ async def on_message(message):
     category_name = base_channel.category.name if base_channel.category else "カテゴリなし"
     channel_name = base_channel.name
     author_name = message.author.display_name
-    content_snippet = message.content[:50] + ("..." if len(message.content) > 50 else "")
+    
+    content = message.content
+    for user in message.mentions:
+        content = content.replace(f"<@{user.id}>", f"@{user.display_name}")
+        content = content.replace(f"<@!{user.id}>", f"@{user.display_name}")
+    for role in message.role_mentions:
+        content = content.replace(f"<@&{role.id}>", f"@{role.name}")
+    content_snippet = content[:50] + ("..." if len(content) > 50 else "")
+    
     message_link = f"https://discord.com/channels/{message.guild.id}/{message.channel.id}/{message.id}"
 
     log_message = (
