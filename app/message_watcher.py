@@ -6,13 +6,15 @@ from server import server_thread  # ← FastAPIを並列起動
 # 環境変数の取得
 TOKEN = os.environ.get("TOKEN")
 TARGET_CHANNEL_ID = os.environ.get("TARGET_CHANNEL_ID")
+TARGET_CHANNEL_ID_SECRET = os.environ.get("TARGET_CHANNEL_ID_SECRET")
 TARGET_ROLE_ID = os.environ.get("TARGET_ROLE_ID")
 
-if TOKEN is None or TARGET_CHANNEL_ID is None or TARGET_ROLE_ID is None:
+if TOKEN is None or TARGET_CHANNEL_ID is None or TARGET_CHANNEL_ID_SECRET is None or TARGET_ROLE_ID is None:
     print("環境変数が設定されていません。")
     exit(1)
 
 TARGET_CHANNEL_ID = int(TARGET_CHANNEL_ID)
+TARGET_CHANNEL_ID_SECRET = int(TARGET_CHANNEL_ID_SECRET)
 TARGET_ROLE_ID = int(TARGET_ROLE_ID)
 
 # Intent設定
@@ -41,7 +43,19 @@ async def on_message(message):
         print("対象のメンションがされていないため、転送しません")
         return
 
-    target_channel = message.guild.get_channel(TARGET_CHANNEL_ID)
+    # プライベートフィルター
+    try:
+        overwrites = base_channel.overwrites_for(everyone_role)
+        if overwrites.read_messages is False:
+            print("プライベートチャンネルのため、マル㊙️チャンネルに転送します")
+            target_channel = message.guild.get_channel(TARGET_CHANNEL_ID_SECRET)
+        else:
+            print("通常チャンネルに転送します")
+            target_channel = message.guild.get_channel(TARGET_CHANNEL_ID)
+    except AttributeError:
+        print("チャンネル権限取得に失敗")
+        return
+    
     if target_channel is None or message.channel.id == TARGET_CHANNEL_ID:
         return
 
@@ -50,14 +64,6 @@ async def on_message(message):
         base_channel = message.channel.parent
 
     everyone_role = message.guild.default_role
-    try:
-        overwrites = base_channel.overwrites_for(everyone_role)
-        if overwrites.read_messages is False:
-            print("プライベートチャンネルなので無視")
-            return
-    except AttributeError:
-        print("チャンネル権限取得に失敗")
-        return
 
     category_name = base_channel.category.name if base_channel.category else "カテゴリなし"
     channel_name = base_channel.name
