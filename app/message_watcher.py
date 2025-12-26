@@ -7,15 +7,13 @@ from server import server_thread  # ← FastAPIを並列起動
 TOKEN = os.environ.get("TOKEN")
 TARGET_CHANNEL_ID = os.environ.get("TARGET_CHANNEL_ID")
 TARGET_CHANNEL_ID_SECRET = os.environ.get("TARGET_CHANNEL_ID_SECRET")
-TARGET_ROLE_ID = os.environ.get("TARGET_ROLE_ID")
 
-if TOKEN is None or TARGET_CHANNEL_ID is None or TARGET_CHANNEL_ID_SECRET is None or TARGET_ROLE_ID is None:
+if TOKEN is None or TARGET_CHANNEL_ID is None or TARGET_CHANNEL_ID_SECRET is None:
     print("環境変数が設定されていません。")
     exit(1)
 
 TARGET_CHANNEL_ID = int(TARGET_CHANNEL_ID)
 TARGET_CHANNEL_ID_SECRET = int(TARGET_CHANNEL_ID_SECRET)
-TARGET_ROLE_ID = int(TARGET_ROLE_ID)
 
 # Intent設定
 intents = discord.Intents.default()
@@ -33,14 +31,6 @@ async def on_ready():
 @bot.event
 async def on_message(message):
     if message.author.bot:
-        return
-
-    # メンションフィルター
-    mention_hit = False
-    if any(role.id == TARGET_ROLE_ID for role in message.role_mentions):
-        mention_hit = True        
-    if not mention_hit:
-        print("対象のメンションがされていないため、転送しません")
         return
 
     base_channel = message.channel
