@@ -32,22 +32,22 @@ async def on_ready():
 async def on_message(message):
     
     # デバッグ開始
-    print("DEBUG ids:",
-      "TARGET_CHANNEL_ID=", TARGET_CHANNEL_ID, type(TARGET_CHANNEL_ID),
-      "TARGET_CHANNEL_ID_SECRET=", TARGET_CHANNEL_ID_SECRET, type(TARGET_CHANNEL_ID_SECRET))
+    # print("DEBUG ids:",
+    #   "TARGET_CHANNEL_ID=", TARGET_CHANNEL_ID, type(TARGET_CHANNEL_ID),
+    #   "TARGET_CHANNEL_ID_SECRET=", TARGET_CHANNEL_ID_SECRET, type(TARGET_CHANNEL_ID_SECRET))
 
-    target_channel = message.guild.get_channel(TARGET_CHANNEL_ID_SECRET)
-    print("DEBUG target_channel:", target_channel)
+    # target_channel = message.guild.get_channel(TARGET_CHANNEL_ID_SECRET)
+    # print("DEBUG target_channel:", target_channel)
 
-    if target_channel is None:
-        print("SKIP: target_channel is None (id mismatch / cache / permission)")
-        return
+    # if target_channel is None:
+    #     print("SKIP: target_channel is None (id mismatch / cache / permission)")
+    #     return
 
-    if message.channel.id == TARGET_CHANNEL_ID_SECRET:
-        print("SKIP: message is in target channel")
-        return
+    # if message.channel.id == TARGET_CHANNEL_ID_SECRET:
+    #     print("SKIP: message is in target channel")
+    #     return
 
-    print("DEBUG role_mentions:", [r.id for r in message.role_mentions])
+    # print("DEBUG role_mentions:", [r.id for r in message.role_mentions])
     # デバッグ終了
     
     if message.author.bot:
