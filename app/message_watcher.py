@@ -56,7 +56,12 @@ async def on_message(message):
     base_channel = message.channel
     if isinstance(message.channel, discord.Thread):
         base_channel = message.channel.parent
-        
+    
+    # VoiceChannel / StageChannel に投稿（テキスト扱いの投稿）が来ても転送しない
+    if isinstance(base_channel, (discord.VoiceChannel, discord.StageChannel)):
+        print("ボイス/ステージチャンネルのため転送しません")
+        return
+    
     everyone_role = message.guild.default_role
     
     # プライベートフィルター
@@ -72,7 +77,7 @@ async def on_message(message):
         print("チャンネル権限取得に失敗")
         return
     
-    if target_channel is None or message.channel.id == TARGET_CHANNEL_ID:
+    if target_channel is None or message.channel.id == TARGET_CHANNEL_ID or message.channel.id == TARGET_CHANNEL_ID_SECRET:
         return
 
     category_name = base_channel.category.name if base_channel.category else "カテゴリなし"
